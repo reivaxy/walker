@@ -8,20 +8,23 @@ tol = 0.1;
 bearerExtDiam = 13;
 bearerIntDiam = 4;
 bearerZ = 5;
-axleHeight = centerHeight + 50;
 
 footZ = 6;
 footLength = 150;
 footWidth = 15;
 
 nickDepth = 2;
-//plate();
-//axle(1.4);
-//foot();
 
 full() ;
+//plate();
+//axle(centerHeight + 30);
+//foot();
 
+//rotate([0, -90, 0]) laserHolder();
+//ballSocket();
 
+//ballRodHolder();
+//ballRod();
 
 module full() {
   plate();
@@ -29,6 +32,90 @@ module full() {
   translate([0, 0, centerHeight + thick + nickDepth])
     rotate([180, 0, 0])
       plate();
+  translate([0, 0, -10])
+    axle(centerHeight + 30);
+  translate([-footLength/2, footWidth/2, -6])
+    rotate([180, 0, 0])
+      foot();
+}
+
+lensDiam = 8.1;
+lensThick = 1.7;
+ledHoleDiam = 3;
+ledDiam = 6.3;
+wall = 1.2;
+tubeLength = 15;
+tubeSide = lensDiam + wall;
+ballSocketAngle = 25;
+
+module ballRod() {
+  axle(50);
+  translate([0, 0, 50])
+    cylinder(d=2, h = 4, $fn=10);
+  translate([0, 0, 54])
+    sphere(d=ballDiam, $fn=40);
+}
+
+module ballRodHolder() {
+  difference() {
+    cube([10, 10, 10]);
+    translate([5,5,5])
+      cylinder(d=bearerIntDiam + tol, $fn=50, h=5);
+    translate([0, 5, 0])
+      rotate([0, 45, 0])
+        cylinder(d=bearerIntDiam + tol, $fn=50, h=6);
+  }
+
+}
+
+module laserHolder() {
+  difference() {
+    translate([-tubeSide/2, -tubeSide/2, 0])
+      cube([tubeSide*2, tubeSide, tubeLength]);
+
+    // tilted long side
+    rotate([0, 15, 0])
+      translate([tubeSide/2, -tubeSide/2, -tubeLength/2])
+        cube([tubeSide, tubeSide, tubeLength*2]);
+    // tilted short side
+    rotate([0, -ballSocketAngle, 0])
+      translate([tubeSide + 1.5, -tubeSide/2, -tubeLength/2])
+        cube([tubeSide, tubeSide, tubeLength*2]);
+
+    // lens slot
+    translate([0, 0, 0.6])
+      cylinder(d=lensDiam + tol, $fn=100, h = lensThick + tol);
+    // led tube
+    translate([0, 0, 0.6 + lensThick])
+      cylinder(d=ledDiam + tol, $fn=100, h = tubeLength);
+    // light hole
+    cylinder(d=ledHoleDiam, $fn=100, h = tubeLength);
+    // lens slot opening
+    color("blue")
+    translate([-(lensDiam+tol)/2, 0, 0.6])
+      cube([lensDiam, tubeSide/2, lensThick + tol]);
+  }
+  translate([10, 0, tubeLength-1])
+    rotate([0, 90 - ballSocketAngle -180, 0])
+      ballSocket();
+}
+
+ballDiam = 4;
+socketDiam = 5;
+
+module ballSocket() {
+  difference() {
+    cylinder(d=socketDiam, h = 6, $fn=100);
+    translate([0, 0, -ballDiam])
+      sphere(d = 4+tol, $fn=100);
+    cylinder(d = 4-tol, $fn=100, h=ballDiam);
+    translate([-0.3, -5, 0])
+      cube([0.6, 10, ballDiam]);
+    translate([-5, -0.3, 0])
+      cube([10, 0.6, ballDiam]);
+  }
+
+
 }
 
 module foot() {
@@ -53,12 +140,13 @@ module footPart() {
 
 }
 
-module axle(thin) {
+module axle(axleHeight) {
+  thinner = 1.4;
   difference() {
     scale([1.1, 1, 1])
       cylinder(d=bearerIntDiam - 2*tol, h=axleHeight, $fn=150);
     scale([1.4, 1, 1])
-      cylinder(d=bearerIntDiam-thin, h=axleHeight, $fn=150);
+      cylinder(d=bearerIntDiam-thinner, h=axleHeight, $fn=150);
     translate([-bearerIntDiam, -1/2, 0])
       cube([bearerIntDiam * 2, 1, axleHeight]);
   }
